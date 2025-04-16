@@ -3,6 +3,7 @@ h1, h2, h3, p{
 }
 body{
     font-family: Verdana, Geneva, Tahoma, sans-serif;
+    overscroll-behavior: none;
 }
 .common{
     /* background-color: #cccccc; */
@@ -28,7 +29,6 @@ a{
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
-
 }
 .leftmenu{
     position: fixed;
