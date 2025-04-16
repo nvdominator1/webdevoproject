@@ -1,0 +1,117 @@
+h1, h2, h3, p{
+    text-align: center;
+}
+body{
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+.common{
+    /* background-color: #cccccc; */
+    position: absolute;
+    color: black;
+}
+a{
+    color: white
+}
+.header{
+    /* position: fixed; */
+    top: 0px;
+    right: 5px;
+    left: 5px;
+    height: 100px;
+    z-index: 2;
+    color: white;
+    font-size: larger;
+    border-bottom: 3px solid white;
+    text-align: right;
+    padding: 10px;
+    background-image:url(https://i.postimg.cc/7YvQc9Q8/rf411wv5.png);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+
+}
+.leftmenu{
+    position: fixed;
+    top: 0px;
+    left: 5px;
+    width: 150px;
+    bottom: 20px;
+    font-size: 15px;
+    z-index: -1;
+    padding-top: 20px;
+    background-color: rgb(48, 48, 48);
+    color: white;
+    padding-left: 10px;
+}
+.mainbody{
+    top: 115px;
+    left: 164px;
+    right: 164px;
+    bottom: 39px;
+    padding-right: 15px;
+    padding-left: 15px;
+    background-color: white;
+}
+.rightmenu{
+    position: fixed;
+    top: 0px;
+    right: 5px;
+    width: 150px;
+    bottom: 22px; 
+    color: white;
+    padding-top: 20px;
+    padding-left: 5px;
+    background-color: rgb(48, 48, 48);
+}
+.footer{
+    bottom: 0px;
+    left: 5px;
+    right: 5px;
+    height: 20px;
+    font-size: 14px;
+    background-color: rgb(48, 48, 48);
+    color: white;
+    border-top: 1px solid white;
+    text-align: center;
+    position: fixed; 
+    padding-top: 3px;
+}
+.bold{
+    font-weight: bold;
+}
+.unbold{
+    font-weight: lighter;
+}
+.fontsmaller{
+    font-size: 16px;
+}
+.highlight{ 
+    background-color: rgb(48, 48, 48);
+    padding: 4px 12px;
+    border-radius: 6px;
+    display: inline-block;
+}
+.common.header a {
+    background-color: rgb(48, 48, 48);
+    padding: 6px 10px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 12px;
+    color: white;
+    margin-right: 6px;
+    display: inline-block;
+    transition: background-color 0.2s ease;
+  }
+  
+  .common.header a:hover {
+    background-color: rgb(73, 72, 72);
+  }
+.backtotopblack{
+    color: black;
+}
+.uncenter{
+    text-align: left;
+}
+.blue:hover{
+    color: gray;
+}

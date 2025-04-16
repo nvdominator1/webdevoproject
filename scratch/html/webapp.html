@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fly Fishing: Timed Challenge V4</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            display: flex; justify-content: center; align-items: flex-start;
+            min-height: 100vh; background-color: #e0f2fe; padding-top: 1rem;
+        }
+        .common{
+            /* background-color: #cccccc; */
+            position: absolute;
+            color: black;
+        }
+        .header{
+            top: 0px;
+            right: 5px;
+            left: 5px;
+            height: 100px;
+            z-index: 2;
+            color: black;
+            font-size: larger;
+            text-align: right;
+            padding: 10px;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            display: flex; justify-content: center; align-items: flex-start;
+            min-height: 100vh; background-color: #e0f2fe; padding-top: 1rem; padding-bottom: 1rem;
+        }
+        .game-container {
+            width: 95%; max-width: 1000px; background-color: white;
+            border-radius: 12px; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden; position: relative;
+            /* padding-top: 70px; */ /* Removed padding here, handled by title/scenery */
+        }
+
+        /* Scenery */
+        .scenery-container {
+            position: absolute; top: 0; left: 0; width: 100%; height: 70px;
+            overflow: hidden; z-index: 1;
+            background: linear-gradient(to bottom, #87CEEB, #cceeff 80%);
+        }
+        .mountains {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 45px;
+            background: #778899;
+            clip-path: polygon(0% 100%, 0% 65%, 8% 75%, 20% 45%, 35% 70%, 50% 50%, 65% 65%, 80% 35%, 92% 60%, 100% 40%, 100% 100%);
+            z-index: 2;
+        }
+
+        /* Game Title Area */
+        .title-area {
+            padding-top: 70px; /* Space for scenery above */
+            background-color: white; /* Match game container background */
+        }
+
+        /* Main layout container */
+        .main-game-area { display: flex; flex-direction: row; background-color: white; }
+
+        /* River Area (Left) */
+        .river-column { flex-grow: 1; min-width: 400px; position: relative; z-index: 5; }
+        .river {
+            position: relative; height: 550px; background-color: #4da6ff;
+            background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%), linear-gradient(225deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%), linear-gradient(45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%), linear-gradient(315deg, rgba(255, 255, 255, 0.1) 25%, #4da6ff 25%);
+            background-size: 20px 20px; border-bottom: 12px solid #8B4513; border-top: 6px solid #b8a47f;
+            overflow: hidden; border-radius: 0 0 0 8px; animation: ripple-flow 6s linear infinite;
+            margin-right: -1px;
+        }
+        .river-rock { position: absolute; width: 50px; height: 30px; background-color: #a0aec0; border-radius: 40% 60% 60% 40% / 70% 50% 50% 30%; box-shadow: inset 2px 2px 5px rgba(0,0,0,0.2); z-index: 6; }
+
+        /* Fish Targets - Made Bigger */
+        .target-fish {
+            position: absolute; left: 0; top: 0;
+            width: 90px; height: 90px; /* Increased size */
+            border-radius: 50%; cursor: default;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 54px; /* Increased emoji size */
+            transition: opacity 0.5s ease, transform 0.2s ease;
+            will-change: transform, opacity; z-index: 7;
+        }
+        .target-fish.caught { opacity: 0.2; transform: var(--current-transform, translate(0px, 0px)) scale(0.7); }
+
+        /* Fly Marker & Line */
+        .fly-marker { position: absolute; width: 14px; height: 14px; background-color: #ffdd57; border: 1px solid #d97706; border-radius: 50%; transform: translate(-50%, -50%); display: none; z-index: 10; box-shadow: 0 0 6px rgba(0,0,0,0.6); }
+        #flyLineSvg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9; display: none; }
+        #flyLine { stroke: #ffffff; stroke-width: 2; stroke-linecap: round; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.4)); }
+
+        /* Controls Area (Right) */
+        .controls-area {
+            width: 280px; flex-shrink: 0; padding: 1.75rem; background-color: #f8f9fa;
+            border-left: 1px solid #e5e7eb; display: flex; flex-direction: column;
+            justify-content: space-between; border-radius: 0 0 8px 0;
+        }
+        .info-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-shrink: 0; }
+
+        /* Combined Meter Area */
+        .meters-container {
+            display: flex; flex-direction: column; align-items: center; margin-bottom: 2rem;
+            flex-shrink: 0; height: 180px; justify-content: flex-end;
+        }
+        .meter-wrapper { display: flex; flex-direction: column; align-items: center; position: relative; width: 100%; }
+        .meter-label { color: #4b5563; margin-bottom: 8px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; }
+
+        /* Power Meter Container - Pivots */
+        .power-meter-container {
+            height: 150px; width: 35px; border: 3px solid #6b7280;
+            border-radius: 10px; position: relative; overflow: hidden;
+            background-color: #e2e8f0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+            transform-origin: bottom center;
+        }
+        .power-meter-bar { position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(to top, #f87171, #fbbf24, #a3e635); border-radius: 6px 6px 0 0; height: 0%; }
+        .meter-wrapper.active .power-meter-container { filter: brightness(1.05); }
+        .meter-wrapper.active .power-meter-bar { filter: brightness(1.1); }
+
+        /* Button Styling */
+        .cast-button { transition: background-color 0.2s ease, transform 0.1s ease, opacity 0.2s ease; width: 100%; padding: 0.8rem 1rem; margin-top: auto; margin-bottom: 1rem; flex-shrink: 0; }
+        .cast-button:disabled { opacity: 0.5; cursor: not-allowed; background-color: #9ca3af; }
+        .cast-button:hover:not(:disabled) { background-color: #1d4ed8; }
+        .cast-button:active:not(:disabled) { transform: scale(0.97); }
+
+        /* Timer & Score Display */
+        .timer-display, .score-display { font-size: 1.1rem; font-weight: 600; color: #1f2937; background-color: #e0e7ff; padding: 0.4rem 0.8rem; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .timer-display span, .score-display span { font-weight: 700; min-width: 20px; display: inline-block; text-align: right; }
+
+        /* Message Area */
+        .message-area { min-height: 40px; font-weight: 600; color: #1d4ed8; text-align: center; flex-shrink: 0; }
+        .message-area.win { color: #16a34a; font-weight: 700;}
+        .message-area.lose { color: #dc2626; font-weight: 700;}
+
+        /* Animations */
+        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.03); opacity: 0.95; } }
+        .meter-wrapper.active { animation: pulse 0.8s infinite ease-in-out; }
+        @keyframes ripple-flow { 0% { background-position: 0px 0px; } 100% { background-position: 40px 20px; } }
+        .plop-effect { position: absolute; width: 10px; height: 10px; background-color: rgba(255, 255, 255, 0.6); border-radius: 50%; transform: translate(-50%, -50%); animation: plop-anim 0.4s ease-out forwards; z-index: 8; pointer-events: none; }
+        @keyframes plop-anim { 0% { transform: translate(-50%, -50%) scale(1); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(5); opacity: 0; } }
+        .common.header a {
+            background-color: rgb(48, 48, 48);
+            padding: 6px 10px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 12px;
+            color: white;
+            margin-right: 6px;
+            display: inline-block;
+            transition: background-color 0.2s ease;
+        }
+  
+        .common.header a:hover {
+            background-color: rgb(73, 72, 72);
+        }
+
+    </style>
+</head>
+<body class="bg-sky-100">
+    <div class="common header">
+        <a href="../../index.html">Home</a> <br>
+        <a href="../../resume.html">Résumé</a> <br>
+        <a href="../index.html">Fishing</a> <br>
+        <a href="html/webapp.html">Game</a> <br>
+    </div>
+
+    <div class="game-container">
+        <div class="scenery-container">
+             <div class="mountains"></div>
+        </div>
+
+        <div class="title-area">
+             <h2 class="text-center text-3xl font-bold text-gray-700 py-3">Fly Fishing Challenge</h2>
+        </div>
+        <div class="main-game-area">
+
+             <div class="river-column">
+                 <div id="river" class="river">
+                     <div class="river-rock" style="left: 15%; top: 60%;"></div>
+                     <div class="river-rock" style="left: 70%; top: 30%; width: 60px; height: 40px;"></div>
+                     <svg id="flyLineSvg" width="100%" height="100%"><line id="flyLine" x1="0" y1="0" x2="0" y2="0" /></svg>
+                     <div id="flyMarker" class="fly-marker"></div>
+                 </div>
+             </div>
+
+             <div class="controls-area">
+                 <div class="info-bar">
+                     <div class="score-display">Fish Caught: <span id="fishCaughtValue">0</span> / <span id="totalFishValue">5</span></div>
+                     <div class="timer-display">Time: <span id="timerValue">60</span>s</div>
+                 </div>
+
+                 <div class="meters-container">
+                     <div id="powerMeterWrapper" class="meter-wrapper">
+                         <p class="meter-label">Power & Angle</p>
+                         <div id="powerMeterContainer" class="power-meter-container">
+                             <div id="powerMeterBar" class="power-meter-bar"></div>
+                         </div>
+                     </div>
+                 </div>
+
+                 <button id="castButton" class="cast-button bg-blue-600 text-white font-semibold rounded-lg shadow-md text-lg">
+                     Cast
+                 </button>
+
+                 <div id="messageArea" class="message-area mt-4 text-lg h-10">
+                     Click button to set Power & Angle and Cast!
+                 </div>
+             </div>
+
+        </div>
+   </div>
+
+   <script>
+    // --- DOM Elements ---
+    const river = document.getElementById('river');
+    const powerMeterWrapper = document.getElementById('powerMeterWrapper');
+    const powerMeterContainer = document.getElementById('powerMeterContainer');
+    const powerMeterBar = document.getElementById('powerMeterBar');
+    const castButton = document.getElementById('castButton');
+    const fishCaughtValue = document.getElementById('fishCaughtValue');
+    const totalFishValue = document.getElementById('totalFishValue');
+    const timerValueDisplay = document.getElementById('timerValue');
+    const flyMarker = document.getElementById('flyMarker');
+    const flyLineSvg = document.getElementById('flyLineSvg');
+    const flyLine = document.getElementById('flyLine');
+    const messageArea = document.getElementById('messageArea');
+
+    // --- Game State ---
+    let fishCaughtCount = 0;
+    let timerValue = 60;
+    let gameLoopId = null;
+    let gameState = 'idle';
+    let currentPower = 0;
+    let powerDirection = 1;
+    let currentAngle = 0;
+    let angleDirection = 1;
+    let selectedPower = 0;
+    let selectedAngle = 0;
+    let fishData = [];
+    let castAnimationId = null;
+    let lastTimestamp = 0;
+
+    // --- Constants ---
+    const MAX_ANGLE_DEGREES = 50;
+    const ANGLE_SPEED = 35; // Degrees per second for pivoting - SLOWED DOWN MORE
+    const POWER_SPEED = 70; // Percentage points per second - SLOWED DOWN
+    const NUM_FISH = 5;
+    const FISH_BASE_SPEED = 50;
+    const FISH_SIZE = 90; // Increased fish size
+    const CAST_ORIGIN_X_PERCENT = 50;
+    const CAST_ORIGIN_Y_PERCENT = 100;
+    const CAST_ANIMATION_DURATION = 600;
+    const HIT_RADIUS_FACTOR = 0.45; // Keep hit radius factor
+
+    // --- Initialization ---
+    function initializeGame() {
+        console.log("Initializing game (V7 - Easier)...");
+        gameState = 'idle';
+        fishCaughtCount = 0; timerValue = 60;
+        currentPower = 0; powerDirection = 1;
+        currentAngle = 0; angleDirection = 1;
+        selectedPower = 0; selectedAngle = 0;
+        fishData = []; lastTimestamp = 0;
+
+        river.querySelectorAll('.target-fish, .plop-effect').forEach(el => el.remove());
+        flyMarker.style.display = 'none'; flyLineSvg.style.display = 'none';
+
+        if (gameLoopId) cancelAnimationFrame(gameLoopId);
+        if (castAnimationId) cancelAnimationFrame(castAnimationId);
+
+        const riverWidth = river.offsetWidth; const riverHeight = river.offsetHeight;
+        if (riverWidth <= 0 || riverHeight <= 0) { setTimeout(initializeGame, 100); return; }
+
+        // Create Fish
+        for (let i = 0; i < NUM_FISH; i++) {
+            const fishElement = document.createElement('div');
+            fishElement.classList.add('target-fish'); fishElement.id = `fish-${i}`;
+            fishElement.textContent = '🐟';
+            const margin = FISH_SIZE * 0.25;
+            const spawnableWidth = riverWidth - FISH_SIZE - 2 * margin;
+            const spawnableHeight = riverHeight * 0.8 - FISH_SIZE;
+            const x = (spawnableWidth > 0 ? Math.random() * spawnableWidth : 0) + margin;
+            const y = (spawnableHeight > 0 ? Math.random() * spawnableHeight : 0) + (riverHeight * 0.1);
+            const initialTransform = `translate(${x}px, ${y}px)`;
+            fishElement.style.transform = initialTransform;
+            fishElement.style.setProperty('--current-transform', initialTransform);
+            river.appendChild(fishElement);
+            fishData.push({ id: `fish-${i}`, element: fishElement, x: x, y: y, vx: (Math.random() - 0.5) * FISH_BASE_SPEED * 1.5, vy: (Math.random() - 0.5) * FISH_BASE_SPEED * 1.5, caught: false });
+        }
+
+        totalFishValue.textContent = NUM_FISH; updateDisplay();
+        messageArea.textContent = 'Click button to set Power & Angle and Cast!';
+        messageArea.className = 'message-area mt-4 text-lg h-10';
+        castButton.textContent = 'Cast';
+        castButton.disabled = false;
+        castButton.onclick = handleCastButtonClick;
+
+        powerMeterBar.style.height = `0%`;
+        powerMeterContainer.style.transform = `rotate(0deg)`;
+
+        gameState = 'aiming';
+        setActiveMeter(true);
+        gameLoopId = requestAnimationFrame(gameLoop);
+        console.log("Game initialized and loop started.");
+    }
+
+    // --- Highlight Active Control ---
+    function setActiveMeter(isActive) {
+        powerMeterWrapper.classList.toggle('active', isActive);
+    }
+
+    // --- Main Game Loop ---
+    function gameLoop(timestamp) {
+        if (gameState === 'gameOver') return;
+        if (!lastTimestamp) lastTimestamp = timestamp;
+        const deltaTime = (timestamp - lastTimestamp) / 1000;
+        lastTimestamp = timestamp;
+
+        // Timer
+        if (gameState === 'aiming') {
+             timerValue -= deltaTime;
+             if (timerValue <= 0) { timerValue = 0; updateDisplay(); gameOver(false); return; }
+        }
+
+        // Fish Movement
+        const riverWidth = river.offsetWidth; const riverHeight = river.offsetHeight;
+        fishData.forEach(fish => {
+            if (!fish.caught) {
+                fish.x += fish.vx * deltaTime; fish.y += fish.vy * deltaTime;
+                const rightBoundary = riverWidth - FISH_SIZE; const topBoundary = riverHeight * 0.05;
+                const bottomBoundary = riverHeight * 0.95 - FISH_SIZE;
+                if (fish.x <= 0) { fish.x = 0; fish.vx *= -1; } else if (fish.x >= rightBoundary) { fish.x = rightBoundary; fish.vx *= -1; }
+                if (fish.y <= topBoundary) { fish.y = topBoundary; fish.vy *= -1; } else if (fish.y >= bottomBoundary) { fish.y = bottomBoundary; fish.vy *= -1; }
+                const newTransform = `translate(${fish.x}px, ${fish.y}px)`;
+                fish.element.style.transform = newTransform;
+                fish.element.style.setProperty('--current-transform', newTransform);
+            }
+        });
+
+        // Animate Combined Meter
+        if (gameState === 'aiming') {
+            // Power (Height)
+            currentPower += powerDirection * POWER_SPEED * deltaTime;
+            if (currentPower >= 100) { currentPower = 100; powerDirection = -1; }
+            else if (currentPower <= 0) { currentPower = 0; powerDirection = 1; }
+            powerMeterBar.style.height = `${currentPower}%`;
+
+            // Angle (Rotation)
+            currentAngle += angleDirection * ANGLE_SPEED * deltaTime;
+            if (currentAngle >= MAX_ANGLE_DEGREES) { currentAngle = MAX_ANGLE_DEGREES; angleDirection = -1; }
+            else if (currentAngle <= -MAX_ANGLE_DEGREES) { currentAngle = -MAX_ANGLE_DEGREES; angleDirection = 1; }
+            powerMeterContainer.style.transform = `rotate(${currentAngle}deg)`;
+        }
+
+        updateDisplay();
+        gameLoopId = requestAnimationFrame(gameLoop);
+    }
+
+    // --- Casting Logic ---
+    function handleCastButtonClick() {
+        if (gameState === 'aiming') {
+            selectedPower = currentPower; selectedAngle = currentAngle;
+            gameState = 'casting';
+            castButton.disabled = true; castButton.textContent = 'Casting...';
+            messageArea.textContent = ''; setActiveMeter(false);
+            console.log(`Casting: P=${selectedPower.toFixed(1)}, A=${selectedAngle.toFixed(1)}`);
+            performCastAnimation();
+        }
+    }
+
+    // --- Cast Animation ---
+    function performCastAnimation() {
+        const riverHeight = river.offsetHeight; const riverWidth = river.offsetWidth;
+        const originX = riverWidth * (CAST_ORIGIN_X_PERCENT / 100);
+        const originY = riverHeight;
+        const angleRadians = selectedAngle * (Math.PI / 180.0);
+        const maxDistance = riverHeight * 0.95;
+        const distance = (selectedPower / 100) * maxDistance;
+        const deltaX = distance * Math.sin(angleRadians);
+        const deltaY = -distance * Math.cos(angleRadians);
+        const finalLandingX = originX + deltaX; const finalLandingY = originY + deltaY;
+        const markerRadius = flyMarker.offsetWidth / 2;
+        const clampedX = Math.max(markerRadius, Math.min(riverWidth - markerRadius, finalLandingX));
+        const clampedY = Math.max(markerRadius, Math.min(riverHeight - markerRadius, finalLandingY));
+
+        let startTime = null;
+        flyMarker.style.display = 'block'; flyLineSvg.style.display = 'block';
+        flyLine.setAttribute('x1', originX); flyLine.setAttribute('y1', originY);
+
+        function animateCastFrame(timestamp) {
+            if (!startTime) startTime = timestamp;
+            const elapsedTime = timestamp - startTime;
+            const progress = Math.min(elapsedTime / CAST_ANIMATION_DURATION, 1);
+            const currentX = originX + (clampedX - originX) * progress;
+            const currentY = originY + (clampedY - originY) * progress;
+            const arcHeight = Math.max(30, distance * 0.2);
+            const arcYOffset = Math.sin(progress * Math.PI) * arcHeight;
+            const finalCurrentY = currentY - arcYOffset;
+            flyMarker.style.left = `${currentX}px`; flyMarker.style.top = `${finalCurrentY}px`;
+            flyLine.setAttribute('x2', currentX); flyLine.setAttribute('y2', finalCurrentY);
+
+            if (progress < 1) {
+                castAnimationId = requestAnimationFrame(animateCastFrame);
+            } else {
+                flyMarker.style.display = 'none'; flyLineSvg.style.display = 'none';
+                createPlopEffect(clampedX, clampedY); checkHit(clampedX, clampedY);
+                if (gameState !== 'gameOver') {
+                    gameState = 'aiming'; castButton.disabled = false; castButton.textContent = 'Cast';
+                    if (fishCaughtCount < NUM_FISH) {
+                         const currentMessage = messageArea.textContent;
+                         if (currentMessage === 'Fish On!' || currentMessage === 'Miss!') {
+                             messageArea.textContent = `${currentMessage} Cast again!`;
+                         } else { messageArea.textContent = 'Click button to Cast!'; }
+                    }
+                    currentPower = 0; powerDirection = 1; powerMeterBar.style.height = `0%`;
+                    setActiveMeter(true);
+                }
+                castAnimationId = null;
+            }
+        }
+        castAnimationId = requestAnimationFrame(animateCastFrame);
+    }
+
+    // --- Create Plop Effect ---
+    function createPlopEffect(x, y) {
+        const plop = document.createElement('div');
+        plop.classList.add('plop-effect'); plop.style.left = `${x}px`;
+        plop.style.top = `${y}px`; river.appendChild(plop);
+        setTimeout(() => { plop.remove(); }, 400);
+    }
+
+    // --- Check Hit ---
+    function checkHit(flyX, flyY) {
+        if (gameState === 'gameOver') return;
+        let hitDetected = false;
+        fishData.forEach(fish => {
+            if (!fish.caught) {
+                const fishCenterX = fish.x + FISH_SIZE / 2; const fishCenterY = fish.y + FISH_SIZE / 2;
+                const distanceSq = (flyX - fishCenterX)**2 + (flyY - fishCenterY)**2;
+                const hitRadiusSq = (FISH_SIZE * HIT_RADIUS_FACTOR)**2;
+                if (distanceSq <= hitRadiusSq) {
+                    hitDetected = true; fish.caught = true; fish.element.classList.add('caught');
+                    fish.vx = 0; fish.vy = 0; fishCaughtCount++; messageArea.textContent = 'Fish On!';
+                    if (fishCaughtCount === NUM_FISH) { gameOver(true); return; }
+                }
+            }
+        });
+        if (!hitDetected && gameState !== 'gameOver') { messageArea.textContent = 'Miss!'; }
+        updateDisplay();
+    }
+
+    // --- Game Over ---
+    function gameOver(isWin) {
+        console.log("Game Over. Win:", isWin);
+        gameState = 'gameOver';
+        cancelAnimationFrame(gameLoopId); gameLoopId = null;
+        if (castAnimationId) cancelAnimationFrame(castAnimationId); castAnimationId = null;
+        castButton.disabled = true; setActiveMeter(false);
+
+        if (isWin) {
+            messageArea.textContent = `You caught all ${NUM_FISH} fish! Well done!`;
+            messageArea.className = 'message-area mt-4 text-lg h-10 win';
+        } else {
+            if (fishCaughtCount < NUM_FISH) {
+                 messageArea.textContent = `Time's up! You caught ${fishCaughtCount} / ${NUM_FISH} fish.`;
+                 messageArea.className = 'message-area mt-4 text-lg h-10 lose';
+            }
+        }
+        castButton.textContent = 'Restart Game'; castButton.disabled = false;
+        castButton.onclick = initializeGame;
+    }
+
+    // --- Update Display Elements ---
+    function updateDisplay() {
+        if (timerValueDisplay) { timerValueDisplay.textContent = Math.ceil(timerValue); }
+        if (fishCaughtValue) { fishCaughtValue.textContent = fishCaughtCount; }
+    }
+
+    // --- Event Listeners ---
+    castButton.addEventListener('click', handleCastButtonClick);
+
+    // --- Start Game on Load ---
+    window.onload = initializeGame;
+
+</script>
+
+</body>
+</html>
